@@ -7,9 +7,6 @@ import tkinter
 from tkinter import filedialog
 from tkinter import messagebox
 
-root = tkinter.Tk()
-root.withdraw()
-
 
 def select_date_range():
     # Runs through a series of prompts that asks the user the range of dates for which they want to pull data
@@ -21,11 +18,11 @@ def select_date_range():
     # date_range[3-5] is the end date
     date_range = [0, 0, 0, 0, 0, 0]
     date_range[0] = month_check(integer_check(input("Enter the month to start copying data (Enter 1-12):")))
-    date_range[1] = date_check(integer_check(input("Enter the date to start copying data (Enter 1-31):")))
+    date_range[1] = date_check(integer_check(input("Enter the date to start copying data (Enter 1-31):")),date_range[0])
     date_range[2] = year_check(integer_check(input("Enter the year to start copying data (Enter YYYY):")))
 
     date_range[3] = month_check(integer_check(input("Enter the month to end copying data (Enter 1-12:):")))
-    date_range[4] = date_check(integer_check(input("Enter the date to end copying data (Enter 1-31):")))
+    date_range[4] = date_check(integer_check(input("Enter the date to end copying data (Enter 1-31):")),date_range[3])
     date_range[5] = year_check(integer_check(input("Enter the year to end copying data (Enter YYYY):")))
 
     start_date = datetime.datetime.strptime(
@@ -77,9 +74,10 @@ def month_check(month):
     return month
 
 
-def date_check(date):
+def date_check(date, month):
     # Verifies the date is between legitimate values for dates and asks 3 times, if user fails then exit program
     # Takes in day, and returns date if day is valid or exits program if not
+
     for i in range(2):
         if date is None:
             input("Program Cancelled by User. Press any key to continue...")
@@ -94,6 +92,18 @@ def date_check(date):
     if date <= 0 or date > 31:
         input("Failed to select valid date. Press any key to continue...")
         sys.exit()
+
+    # Checks to make sure if the user specifies day 31 in a month with 30 days the last day of the
+    # month will be specified
+    try:
+        datetime.datetime.strptime(str(date) + "/" + str(month), "%d/%m")
+    except:
+        print("Month does not have numbers of days specified, "
+              "changing date to last day of the specified month")
+        if month == 4 or month == 6 or month == 9 or month == 11:
+            date = 30
+        elif month == 2:
+            date = 28
     return date
 
 
@@ -139,10 +149,11 @@ def verify_end_date(date_range):
         input("End date was before start date. Try running again. Press any key to continue...")
         sys.exit()
     elif date_range[1] > datetime.datetime.now() + datetime.timedelta(days=1):
-        input("End date is after today. Try running again. Press any key to continue...")
-        sys.exit()
+        date_range[1] = datetime.datetime.now() + datetime.timedelta(days=1)
+        print("End date is after today, changing end date to today.")
+        return date_range
     else:
-        return
+        return date_range
 
 
 def verify_creation_date(date_range, creation_time):
@@ -178,23 +189,22 @@ def copy_files(date_range, copy_from_folder, copy_to_folder):
                     os.makedirs(directorypath, exist_ok=True)
                     shutil.copy2(filepath, directorypath)
                     copy_counter = copy_counter + 1
-    print("\nProgram Complete\nCopied:", copy_counter, "files")
+    print("\nCopying Complete\nCopied:", copy_counter, "files")
     return
 
+root = tkinter.Tk()
+root.withdraw()
+welcome_statement = "********************************************************************\n"\
+                    "*************************     Welcome     **************************\n"\
+                    "********************************************************************\n"\
+                    "This program searches subdirectories for .csv files from the source \n"\
+                    "path specified by the user then copies the folder structure with the\n"\
+                    " .csv files to the destination folder.  This program will only copy \n"\
+                    "files where the creation time for the file is within the date range \n"\
+                    "specified by the user."
 
-print("*******************************************\n"
-      "**********       Welcome     **************\n"
-      "*******************************************\n"
-      "This program searches subdirectories for   \n"
-      ".csv files from the source path specified  \n"
-      "by the user then copies the folder         \n"
-      "structure with the .csv files to the destin-\n"
-      "ation folder.  This program will only copy \n"
-      "files where the creation time for the file \n"
-      "is within the date range specified by the  \n"
-      "user.")
-
-input("Press and key to continue...")
+print(welcome_statement)
+input("\nPress and key to continue...")
 
 # Prompt user for confirmation before starting to run application.
 select_folder_response = messagebox.askyesnocancel("Continue?", "Select the directory from where to pull files?")
@@ -213,15 +223,22 @@ file_path_copyto = filedialog.askdirectory(master=None, title="Select Where You 
 
 # Verifies whether the user would like to continue based on yes, no or cancel selection
 verify_response(file_path_copyto)
+print("******************************************************************************************\n"\
+        "Copy From: " + file_path_copyfrom + "\n"\
+        "    _||_  \n"\
+        "    \  / \n"\
+        "     \/  \n"\
+        "Copy To: " + file_path_copyto + "\n"\
+        "******************************************************************************************")
 
 # Asks user for the date range they would like to copy files for
 user_input_range = select_date_range()
 
 # Verifies the dates provided by the user make sense
-verify_end_date(user_input_range)
+user_input_range = verify_end_date(user_input_range)
 
 # Copy the files and create the folder structure
 copy_files(user_input_range, file_path_copyfrom, file_path_copyto)
 
 # Wait until the user exits the program
-end_program = input("\nPress any key to Exit...\n")
+end_program = input("\nPress any key to Exit...")
