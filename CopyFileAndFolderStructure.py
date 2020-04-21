@@ -4,6 +4,7 @@ import shutil
 import stat
 import os
 import tkinter
+import subprocess
 from tkinter import filedialog
 from tkinter import messagebox
 
@@ -18,11 +19,12 @@ def select_date_range():
     # date_range[3-5] is the end date
     date_range = [0, 0, 0, 0, 0, 0]
     date_range[0] = month_check(integer_check(input("Enter the month to start copying data (Enter 1-12):")))
-    date_range[1] = date_check(integer_check(input("Enter the date to start copying data (Enter 1-31):")),date_range[0])
+    date_range[1] = date_check(integer_check(input("Enter the date to start copying data (Enter 1-31):")),
+                               date_range[0])
     date_range[2] = year_check(integer_check(input("Enter the year to start copying data (Enter YYYY):")))
 
     date_range[3] = month_check(integer_check(input("Enter the month to end copying data (Enter 1-12:):")))
-    date_range[4] = date_check(integer_check(input("Enter the date to end copying data (Enter 1-31):")),date_range[3])
+    date_range[4] = date_check(integer_check(input("Enter the date to end copying data (Enter 1-31):")), date_range[3])
     date_range[5] = year_check(integer_check(input("Enter the year to end copying data (Enter YYYY):")))
 
     start_date = datetime.datetime.strptime(
@@ -192,22 +194,38 @@ def copy_files(date_range, copy_from_folder, copy_to_folder):
     print("\nCopying Complete\nCopied:", copy_counter, "files")
     return
 
+
+def display_start_message():
+    # Does not take in any arguments
+    # Returns boolean for whether user selects to continue or not
+
+    if sys.platform == "darwin":
+        selected_response = subprocess.run("osascript -e 'Tell application \"System Events\" to display dialog \""
+                                           "Select the directory from where to pull files?\" with title \"Continue?\"")
+    elif sys.platform == "win32" or sys.platform == "linux" or sys.platform == "linux2":
+        selected_response = messagebox.askyesnocancel("Continue?", "Select the directory from where to pull files?")
+    else:
+        selected_response = False
+
+    return selected_response
+
+
 root = tkinter.Tk()
 root.withdraw()
-welcome_statement = "********************************************************************\n"\
-                    "*************************     Welcome     **************************\n"\
-                    "********************************************************************\n"\
-                    "This program searches subdirectories for .csv files from the source \n"\
-                    "path specified by the user then copies the folder structure with the\n"\
-                    " .csv files to the destination folder.  This program will only copy \n"\
-                    "files where the creation time for the file is within the date range \n"\
-                    "specified by the user."
+welcome_statement = "********************************************************************\n" \
+                    "*************************     Welcome     **************************\n" \
+                    "********************************************************************\n" \
+                    "This program searches subdirectories for files of a certain type    \n" \
+                    "specified by the user from the source path specified by the user    \n" \
+                    "then copies the folder structure with the files to the destination  \n" \
+                    "folder.  This program will only copy files where the creation time  \n" \
+                    "for the file is within the date range specified by the user."
 
 print(welcome_statement)
 input("\nPress and key to continue...")
 
 # Prompt user for confirmation before starting to run application.
-select_folder_response = messagebox.askyesnocancel("Continue?", "Select the directory from where to pull files?")
+select_folder_response = display_start_message()
 
 # Verifies whether the user would like to continue based on yes, no or cancel selection
 verify_response(select_folder_response)
@@ -223,13 +241,13 @@ file_path_copyto = filedialog.askdirectory(master=None, title="Select Where You 
 
 # Verifies whether the user would like to continue based on yes, no or cancel selection
 verify_response(file_path_copyto)
-print("******************************************************************************************\n"\
-        "Copy From: " + file_path_copyfrom + "\n"\
-        "    _||_  \n"\
-        "    \  / \n"\
-        "     \/  \n"\
-        "Copy To: " + file_path_copyto + "\n"\
-        "******************************************************************************************")
+print("******************************************************************************************\n" \
+    "Copy From: " + file_path_copyfrom + "\n" \
+    "    _||_  \n" \
+    "    \  / \n" \
+    "     \/  \n" \
+    "Copy To: " + file_path_copyto + "\n" \
+    "******************************************************************************************")
 
 # Asks user for the date range they would like to copy files for
 user_input_range = select_date_range()
