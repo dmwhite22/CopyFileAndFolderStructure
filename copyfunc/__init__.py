@@ -27,6 +27,9 @@ def copy_files(start_date, end_date, copy_from_folder, copy_to_folder, filetype)
 
     copy_counter = 0
     current_time = datetime.datetime.today().strftime('%m-%d-%Y-%I%M')
+
+    search_terms = verify.get_search_terms(filetype)
+
     for subdir, dirs, files in os.walk(copy_from_folder):
 
         # Verifies the sub-directory creation time is in between the date range provided by the user,
@@ -37,10 +40,13 @@ def copy_files(start_date, end_date, copy_from_folder, copy_to_folder, filetype)
                 filepath = subdir + os.sep + filename
                 folderpath = subdir + os.sep
                 directorypath = copy_to_folder + '/' + 'Copied-' + current_time + folderpath[len(copy_from_folder):]
-                if filepath.endswith(filetype):
-                    os.makedirs(directorypath, exist_ok=True)
-                    shutil.copy2(filepath, directorypath)
-                    copy_counter = copy_counter + 1
+
+                for term in search_terms:
+                    if filepath.endswith(term):
+                            os.makedirs(directorypath, exist_ok=True)
+                            shutil.copy2(filepath, directorypath)
+                            copy_counter = copy_counter + 1
+
     if copy_counter > 0:
         tmp = str(copy_counter)
         tkinter.messagebox.showinfo(title=None, message="Copying Complete\nCopied: " + tmp + " files\n\nNew Files "

@@ -249,6 +249,20 @@ class MyTestCase(unittest.TestCase):
         result = copyfunc.validate_user_data(4, 4, 2020, 4, 4, 2020, os.getcwd(), os.getcwd(), '.blahblahblah')
         self.assertEqual(result, 'Files Copied')
 
+    def test_get_search_terms_one_term(self):
+        result = verify.get_search_terms('.txt')
+        self.assertEqual(result, '.txt')
+
+    def test_get_search_terms_two_terms_with_space(self):
+        result = verify.get_search_terms('.txt, .docx')
+        test_array = ['.txt', '.docx']
+        self.assertEqual(result, test_array)
+
+    def test_get_search_terms_two_terms_without_space(self):
+        result = verify.get_search_terms('.txt,.docx')
+        test_array = ['.txt', '.docx']
+        self.assertEqual(result, test_array)
+
 
 if __name__ == '__main__':
     unittest.main()
