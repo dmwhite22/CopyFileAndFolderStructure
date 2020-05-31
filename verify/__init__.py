@@ -133,3 +133,18 @@ def year_check(year, time_string):
                                                                     "digits and no later than the current year (i.e. "
                                                                     "year 2010 is entered as '2010'")
         return year
+
+
+def get_search_terms(filetype):
+    if ',' in filetype:
+        multiple_filetype = filetype.split(',')
+        term_num = 0
+        for term in multiple_filetype:
+            if term.find(' ') == 0:
+                term = term[1:]
+            multiple_filetype[term_num] = term
+            term_num = term_num + 1
+        return multiple_filetype
+    else:
+        filetype_array = [filetype]
+        return filetype_array
