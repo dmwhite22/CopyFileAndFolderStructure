@@ -70,6 +70,16 @@ def make_time_end_of_day(day, month, year):
     return end_of_day
 
 
+def make_time_start_of_day(day, month, year):
+    # Function that takes in a particular day and makes the time the start time for that day
+    # Takes in day, month, year
+    # Returns the start time of the specified day
+
+    start_of_day = datetime.datetime.strptime(
+        str(day) + "/" + str(month) + "/" + str(year) + " 00:00:00", "%d/%m/%Y %H:%M:%S")
+    return start_of_day
+
+
 def get_input_data(sd_entry, sm_entry, sy_entry, ed_entry, em_entry, ey_entry, filepath_from_entry, filepath_to_entry,
                    filetype_entry):
     # Gets all user data entered on the form
@@ -110,7 +120,7 @@ def validate_user_data(sd, sm, sy, ed, em, ey, filepath_from, filepath_to, filet
 
     if isinstance(start_month, int) and isinstance(start_day, int) and isinstance(start_year, int) and \
             isinstance(end_month, int) and isinstance(end_day, int) and isinstance(end_year, int):
-        start_date = make_time_end_of_day(start_day, start_month, start_year)
+        start_date = make_time_start_of_day(start_day, start_month, start_year)
         end_date = make_time_end_of_day(end_day, end_month, end_year)
 
         # Verifies the dates provided by the user make sense
