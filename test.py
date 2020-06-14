@@ -219,6 +219,12 @@ class MyTestCase(unittest.TestCase):
             str(1) + "/" + str(3) + "/" + str(2020) + " 23:59:59", "%d/%m/%Y %H:%M:%S")
         self.assertEqual(result, outside_function)
 
+    def test_make_time_start_of_day(self):
+        result = copyfunc.make_time_start_of_day(14, 6, 2020)
+        outside_function = datetime.datetime.strptime(
+            str(14) + "/" + str(6) + "/" + str(2020) + " 00:00:00", "%d/%m/%Y %H:%M:%S")
+        self.assertEqual(result, outside_function)
+
     @patch('verify.date_check', return_value='a')
     def test_validate_user_data_int_for_date(self, start_date):
         result = copyfunc.validate_user_data('a', 4, 2020, 4, 4, 2020, os.getcwd(), os.getcwd(), '.txt')
@@ -251,7 +257,7 @@ class MyTestCase(unittest.TestCase):
 
     def test_get_search_terms_one_term(self):
         result = verify.get_search_terms('.txt')
-        self.assertEqual(result, '.txt')
+        self.assertEqual(result, ['.txt'])
 
     def test_get_search_terms_two_terms_with_space(self):
         result = verify.get_search_terms('.txt, .docx')
